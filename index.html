@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriFit - Akıllı Mutfak Asistanı ve Tarif Önerici</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #4caf50;
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --accent: #ff9800;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 26px;
+        }
+
+        header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        main {
+            flex: 1;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 25px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 90%;
+        }
+
+        .section-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .ingredients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 5px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .ingredient-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fafafa;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .ingredient-checkbox:hover {
+            background: #e8f5e9;
+            border-color: var(--primary-light);
+        }
+
+        .ingredient-checkbox input {
+            cursor: pointer;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--primary-light);
+        }
+
+        .results-container {
+            margin-top: 30px;
+        }
+
+        .recipe-card {
+            background: #f9f9f9;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        .recipe-card h3 {
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .recipe-meta {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .recipe-ingredients {
+            font-size: 14px;
+            color: #444;
+        }
+
+        .no-result {
+            text-align: center;
+            color: #777;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: #e0e0e0;
+            font-size: 13px;
+            color: #555;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>NutriFit</h1>
+        <p>Mutfağındakileri Seç, 50 Tariflik Veri Tabanından Uygun Yemekleri Keşfet!</p>
+    </header>
+
+    <main>
+        <div class="section-title">Mutfağında Hangi Malzemeler Var? (İstediklerini İşaretle)</div>
+        
+        <div class="ingredients-grid" id="ingredientsList">
+            <!-- JavaScript ile doldurulacak -->
+        </div>
+
+        <button onclick="findRecipes()">Uygun Tarif Önerilerini Getir</button>
+
+        <div class="results-container">
+            <div class="section-title">Eşleşen Tarifler</div>
+            <div id="recipeResults">
+                <div class="no-result">Henüz arama yapılmadı. Lütfen malzemelerinizi seçip butona tıklayın.</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 NutriFit - Akıllı Mutfak Asistanı</p>
+    </footer>
+
+    <script>
+        // 50 Tariflik Veri Tabanı ve İçerdikleri Malzemeler
+        const recipes = [
+            { id: 1, name: "Menemen", category: "Kahvaltı", cal: 210, ingredients: ["Yumurta", "Domates", "Biber", "Sıvı Yağ"] },
+            { id: 2, name: "Mercimek Çorbası", category: "Çorba", cal: 140, ingredients: ["Kırmızı Mercimek", "Soğan", "Sıvı Yağ", "Un"] },
+            { id: 3, name: "Karnıyarık", category: "Ana Yemek", cal: 320, ingredients: ["Patlıcan", "Kıyma", "Soğan", "Domates", "Sıvı Yağ"] },
+            { id: 4, name: "Pirinç Pilavı", category: "Yan Yemek", cal: 250, ingredients: ["Pirinç", "Tereyağı", "Şehriye"] },
+            { id: 5, name: "Tavuk Sote", category: "Ana Yemek", cal: 280, ingredients: ["Tavuk", "Biber", "Domates", "Sıvı Yağ", "Soğan"] },
+            { id: 6, name: "Spagetti Makarna", category: "Ana Yemek", cal: 350, ingredients: ["Makarna", "Sıvı Yağ", "Salça"] },
+            { id: 7, name: "Lahmacun", category: "Hamur İşi", cal: 220, ingredients: ["Un", "Kıyma", "Soğan", "Domates", "Biber"] },
+            { id: 8, name: "Mantı", category: "Ana Yemek", cal: 400, ingredients: ["Un", "Yumurta", "Kıyma", "Yoğurt", "Tereyağı"] },
+            { id: 9, name: "Patates Kızartması", category: "Atıştırmalık", cal: 310, ingredients: ["Patates", "Sıvı Yağ"] },
+            { id: 10, name: "Ezogelin Çorbası", category: "Çorba", cal: 150, ingredients: ["Kırmızı Mercimek", "Bulgur", "Pirinç", "Soğan", "Sıvı Yağ"] },
+            { id: 11, name: "İzmir Köfte", category: "Ana Yemek", cal: 340, ingredients: ["Kıyma", "Patates", "Domates", "Biber", "Soğan", "Sıvı Yağ"] },
+            { id: 12, name: "Kuru Fasulye", category: "Ana Yemek", cal: 290, ingredients: ["Kuru Fasulye", "Soğan", "Salça", "Sıvı Yağ"] },
+            { id: 13, name: "Bulgur Pilavı", category: "Yan Yemek", cal: 240, ingredients: ["Bulgur", "Soğan", "Domates", "Sıvı Yağ"] },
+            { id: 14, name: "Sebzeli Omlet", category: "Kahvaltı", cal: 190, ingredients: ["Yumurta", "Biber", "Domates", "Sıvı Yağ"] },
+            { id: 15, name: "Sucuklu Yumurta", category: "Kahvaltı", cal: 310, ingredients: ["Yumurta", "Sucuk", "Sıvı Yağ"] },
+            { id: 16, name: "Yayla Çorbası", category: "Çorba", cal: 130, ingredients: ["Yoğurt", "Pirinç", "Nane", "Tereyağı", "Un"] },
+            { id: 17, name: "Domates Çorbası", category: "Çorba", cal: 120, ingredients: ["Domates", "Un", "Tereyağı", "Süt"] },
+            { id: 18, name: "Kıymalı Pide", category: "Hamur İşi", cal: 380, ingredients: ["Un", "Kıyma", "Soğan", "Biber", "Tereyağı"] },
+            { id: 19, name: "Peynirli Börek", category: "Hamur İşi", cal: 330, ingredients: ["Yufka", "Peynir", "Süt", "Yumurta", "Sıvı Yağ"] },
+            { id: 20, name: "Menemen (Kaşarlı)", category: "Kahvaltı", cal: 260, ingredients: ["Yumurta", "Domates", "Biber", "Kaşar Peyniri", "Sıvı Yağ"] },
+            { id: 21, name: "Şehriye Çorbası", category: "Çorba", cal: 110, ingredients: ["Şehriye", "Domates", "Sıvı Yağ"] },
+            { id: 22, name: "Fırında Tavuk", category: "Ana Yemek", cal: 310, ingredients: ["Tavuk", "Patates", "Domates", "Sıvı Yağ"] },
+            { id: 23, name: "Etli Nohut", category: "Ana Yemek", cal: 320, ingredients: ["Nohut", "Kıyma", "Soğan", "Salça", "Sıvı Yağ"] },
+            { id: 24, name: "Patates Püresi", category: "Yan Yemek", cal: 180, ingredients: ["Patates", "Süt", "Tereyağı"] },
+            { id: 25, name: "Mücver", category: "Atıştırmalık", cal: 200, ingredients: ["Kabak", "Yumurta", "Un", "Sıvı Yağ"] },
+            { id: 26, name: "Menemen (Soğansız)", category: "Kahvaltı", cal: 200, ingredients: ["Yumurta", "Domates", "Biber", "Sıvı Yağ"] },
+            { id: 27, name: "Salçalı Makarna", category: "Ana Yemek", cal: 320, ingredients: ["Makarna", "Salça", "Sıvı Yağ"] },
+            { id: 28, name: "Kaşarlı Tost", category: "Kahvaltı", cal: 290, ingredients: ["Ekmek", "Kaşar Peyniri", "Tereyağı"] },
+            { id: 29, name: "Sucuklu Tost", category: "Kahvaltı", cal: 340, ingredients: ["Ekmek", "Sucuk", "Kaşar Peyniri"] },
+            { id: 30, name: "Omlet", category: "Kahvaltı", cal: 160, ingredients: ["Yumurta", "Sıvı Yağ"] },
+            { id: 31, name: "Ispanak Yemeği", category: "Ana Yemek", cal: 170, ingredients: ["Ispanak", "Soğan", "Pirinç", "Sıvı Yağ"] },
+            { id: 32, name: "Kıymalı Ispanak", category: "Ana Yemek", cal: 230, ingredients: ["Ispanak", "Kıyma", "Soğan", "Pirinç", "Sıvı Yağ"] },
+            { id: 33, name: "Zeytinyağlı Kabak", category: "Ana Yemek", cal: 140, ingredients: ["Kabak", "Soğan", "Pirinç", "Sıvı Yağ", "Dereotu"] },
+            { id: 34, name: "İmam Bayıldı", category: "Ana Yemek", cal: 210, ingredients: ["Patlıcan", "Soğan", "Domates", "Sıvı Yağ"] },
+            { id: 35, name: "Türlü", category: "Ana Yemek", cal: 190, ingredients: ["Patlıcan", "Kabak", "Patates", "Domates", "Soğan", "Sıvı Yağ"] },
+            { id: 36, name: "Menemen (Bol Domatesli)", category: "Kahvaltı", cal: 210, ingredients: ["Yumurta", "Domates", "Sıvı Yağ"] },
+            { id: 37, name: "Yoğurtlu Makarna", category: "Ana Yemek", cal: 330, ingredients: ["Makarna", "Yoğurt", "Sarımsak"] },
+            { id: 38, name: "Mercimek Köftesi", category: "Atıştırmalık", cal: 220, ingredients: ["Kırmızı Mercimek", "Bulgur", "Soğan", "Sıvı Yağ"] },
+            { id: 39, name: "Kısırlık Bulgur", category: "Atıştırmalık", cal: 240, ingredients: ["Bulgur", "Soğan", "Salça", "Sıvı Yağ"] },
+            { id: 40, name: "Patates Salatası", category: "Yan Yemek", cal: 170, ingredients: ["Patates", "Sıvı Yağ"] },
+            { id: 41, name: "Tarhana Çorbası", category: "Çorba", cal: 140, ingredients: ["Tarhana", "Tereyağı", "Salça"] },
+            { id: 42, name: "Şehriyeli Tavuk Suyu Çorbası", category: "Çorba", cal: 130, ingredients: ["Tavuk", "Şehriye", "Sıvı Yağ"] },
+            { id: 43, name: "Fırında Kaşarlı Patates", category: "Yan Yemek", cal: 260, ingredients: ["Patates", "Kaşar Peyniri", "Tereyağı", "Süt"] },
+            { id: 44, name: "Kıymalı Yumurta", category: "Kahvaltı", cal: 280, ingredients: ["Yumurta", "Kıyma", "Sıvı Yağ"] },
+            { id: 45, name: "Peynirli Omlet", category: "Kahvaltı", cal: 220, ingredients: ["Yumurta", "Peynir", "Sıvı Yağ"] },
+            { id: 46, name: "Ev Yapımı Pizza", category: "Ana Yemek", cal: 420, ingredients: ["Un", "Domates", "Kaşar Peyniri", "Sucuk", "Sıvı Yağ"] },
+            { id: 47, name: "Sebzeli Bulgur Pilavı", category: "Yan Yemek", cal: 260, ingredients: ["Bulgur", "Domates", "Biber", "Soğan", "Sıvı Yağ"] },
+            { id: 48, name: "Kıymalı Börek", category: "Hamur İşi", cal: 360, ingredients: ["Yufka", "Kıyma", "Soğan", "Süt", "Sıvı Yağ"] },
+            { id: 49, name: "Patatesli Yumurta", category: "Kahvaltı", cal: 270, ingredients: ["Patates", "Yumurta", "Sıvı Yağ"] },
+            { id: 50, name: "Sade Makarna", category: "Ana Yemek", cal: 300, ingredients: ["Makarna", "Tereyağı"] }
+        ];
+
+        // Tüm benzersiz malzemeleri otomatik çıkar ve listeyi oluştur
+        function initIngredients() {
+            const allIngredients = new Set();
+            recipes.forEach(r => r.ingredients.forEach(i => allIngredients.add(i)));
+
+            const container = document.getElementById('ingredientsList');
+            container.innerHTML = '';
+
+            Array.from(allIngredients).sort().forEach(ing => {
+                container.innerHTML += `
+                    <label class="ingredient-checkbox">
+                        <input type="checkbox" value="${ing}"> ${ing}
+                    </label>
+                `;
+            });
+        }
+
+        // Seçilen malzemelere göre tarifleri filtrele ve eşleşme oranına göre sırala
+        function findRecipes() {
+            const checkboxes = document.querySelectorAll('.ingredients-grid input[type="checkbox"]:checked');
+            const userIngredients = Array.from(checkboxes).map(cb => cb.value);
+
+            const resultsContainer = document.getElementById('recipeResults');
+
+            if (userIngredients.length === 0) {
+                resultsContainer.innerHTML = `<div class="no-result">Lütfen en az bir malzeme seçin!</div>`;
+                return;
+            }
+
+            // Her tarifin kullanıcıda kaç malzemesi olduğuna bak
+            const scoredRecipes = recipes.map(recipe => {
+                const matched = recipe.ingredients.filter(ing => userIngredients.includes(ing));
+                const matchRate = matched.length / recipe.ingredients.length;
+                return {
+                    ...recipe,
+                    matchedCount: matched.length,
+                    matchRate: matchRate,
+                    missing: recipe.ingredients.filter(ing => !userIngredients.includes(ing))
+                };
+            });
+
+            // En az 1 malzemesi uyanları filtrele ve eşleşme oranına göre sırala
+            const matchedRecipes = scoredRecipes.filter(r => r.matchedCount > 0);
+            matchedRecipes.sort((a, b) => b.matchRate - a.matchRate);
+
+            if (matchedRecipes.length === 0) {
+                resultsContainer.innerHTML = `<div class="no-result">Seçtiğiniz malzemelerle eşleşen bir tarif bulunamadı. Daha fazla malzeme seçmeyi deneyebilirsiniz.</div>`;
+                return;
+            }
+
+            resultsContainer.innerHTML = '';
+            matchedRecipes.forEach(r => {
+                resultsContainer.innerHTML += `
+                    <div class="recipe-card">
+                        <h3>${r.name}</h3>
+                        <div class="recipe-meta">Kategori: <b>${r.category}</b> | Kalori: <b>${r.cal} kcal</b> | Uyan Malzeme: <b>${r.matchedCount} / ${r.ingredients.length}</b></div>
+                        <div class="recipe-ingredients"><b>Tüm Malzemeler:</b> ${r.ingredients.join(', ')}</div>
+                        ${r.missing.length > 0 ? `<div style="font-size:13px; color:#d9534f; margin-top:4px;">Eksik Malzemeler: ${r.missing.join(', ')}</div>` : '<div style="font-size:13px; color:#2e7d32; margin-top:4px;"><b>Tüm malzemeler mutfağınızda mevcut!</b></div>'}
+                    </div>
+                `;
+            });
+        }
+
+        // Sayfa açıldığında malzemeleri yükle
+        window.onload = initIngredients;
+    </script>
+</body>
+</html>
