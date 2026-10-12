@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Kiler Tarifleri</string>
+    <string name="screen_title">Bugün ne pişirsek?</string>
+    <string name="screen_subtitle">Elindeki malzemelerle yapabileceğin tarifleri keşfet.</string>
+    <string name="pantry_title">Kilerimdeki malzemeler</string>
+    <string name="find_recipes">Tarifleri Bul</string>
+    <string name="results_title">Tarif önerileri</string>
+    <string name="select_ingredients_hint">Tarifleri görmek için malzemelerini seç.</string>
+    <string name="select_at_least_one">Önce en az bir malzeme seç.</string>
+    <string name="no_recipes_found">Seçtiğin malzemelerle eşleşen tarif bulunamadı.</string>
+    <string name="available_ingredients">Malzemeler: %1$s</string>
+    <string name="missing_ingredients">Eksik: %1$s</string>
+    <string name="all_ingredients_available">Tüm malzemeler elinde var.</string>
+    <string name="recipe_details">%1$s · %2$d kcal · %3$d/%4$d malzeme</string>
+    <string name="recipe_load_error">Tarifler yüklenemedi.</string>
+</resources>
